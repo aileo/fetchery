@@ -24,6 +24,9 @@ app.post('/body/form', upload.none(), ({ body }, res) =>
 app.post('/body/url', express.urlencoded(), ({ body }, res) =>
   res.json({ body: body })
 );
+app.post('/body/file', upload.single('file'), ({ file }, res) =>
+  res.json({ file: { name: file?.originalname, size: file?.size } })
+);
 
 function build(): Promise<unknown> {
   return new Promise((resolve) => {

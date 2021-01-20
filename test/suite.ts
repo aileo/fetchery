@@ -86,6 +86,12 @@ describe('request', () => {
       cast: CAST.URL,
       method: METHOD.POST,
     });
+    client.addService('body.file', {
+      route: '/body/file',
+      contentType: false,
+      cast: CAST.FORMDATA,
+      method: METHOD.POST,
+    });
   });
 
   describe('params', () => {
@@ -197,6 +203,21 @@ describe('request', () => {
           body: data.urlEncoded,
         });
         assert.deepStrictEqual(res, { body: data.object });
+      });
+    });
+
+    describe('Should send File', () => {
+      it('From object', async () => {
+        const file = new File(Array.from('test'), 'test.txt');
+        const res = await client.request('body.file', { body: { file } });
+        assert.deepStrictEqual(res, { file: { name: 'test.txt', size: 4 } });
+      });
+      it('From FormData', async () => {
+        const file = new File(Array.from('test'), 'test.txt');
+        const body = new FormData();
+        body.append('file', file);
+        const res = await client.request('body.file', { body });
+        assert.deepStrictEqual(res, { file: { name: 'test.txt', size: 4 } });
       });
     });
   });

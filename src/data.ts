@@ -38,6 +38,8 @@ function toDataObject(
         _data[key].forEach((value: any) => {
           obj.append(key, sanitize(value));
         });
+      } else if (_data[key] instanceof File) {
+        obj.append(key, _data[key]);
       } else {
         obj.append(key, sanitize(_data[key]));
       }
