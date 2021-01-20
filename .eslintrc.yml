@@ -1,0 +1,81 @@
+env:
+  es2020: true
+  node: true
+extends:
+  - 'eslint:recommended'
+  - 'plugin:prettier/recommended'
+  - 'plugin:@typescript-eslint/eslint-recommended'
+  - 'plugin:@typescript-eslint/recommended'
+parser: '@typescript-eslint/parser'
+parserOptions:
+  ecmaFeatures:
+    jsx: true
+  ecmaVersion: 11
+  sourceType: module
+plugins:
+  - prettier
+  - '@typescript-eslint'
+  - html
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - single
+  semi:
+    - error
+    - always
+  no-console:
+    - error
+  no-template-curly-in-string:
+    - error
+  array-callback-return:
+    - error
+  block-scoped-var:
+    - error
+  class-methods-use-this:
+    - error
+  curly:
+    - error
+    - multi-line
+    - consistent
+  consistent-return:
+    - error
+  dot-notation:
+    - error
+  dot-location:
+    - error
+    - property
+  eqeqeq:
+    - error
+    - smart
+  no-else-return:
+    - error
+  no-extra-bind:
+    - error
+  no-eval:
+    - error
+  no-floating-decimal:
+    - error
+  no-implicit-globals:
+    - error
+  no-invalid-this:
+    - error
+  no-multi-spaces:
+    - error
+  no-use-before-define:
+    - error
+  prettier/prettier:
+    - error
+  '@typescript-eslint/ban-ts-comment':
+    - warn
+overrides:
+  - files:
+      - src/**
+    env:
+      browser: true
+      es2020: true
