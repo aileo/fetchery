@@ -1,0 +1,12 @@
+.cache/*
+.nyc_output/*
+.vscode/*
+coverage/*
+dev/*
+node_modules/*
+test/*
+.babelrc
+.eslintrc.yml
+.prettierrc
+package-lock.json
+tsconfig.json
