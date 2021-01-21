@@ -61,7 +61,7 @@ await client.request('file.upload', {
 ### Get all services
 
 ```typescript
-const api = client.getServices;
+const api = client.getServices();
 
 await api.user.login({ body: { username: 'foo', password: 'bar' } });
 const item = await api.item.get({
