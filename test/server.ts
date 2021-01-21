@@ -14,7 +14,7 @@ const bundler = new Bundler(resolve(__dirname, './suite.html'), {
 });
 const app = express();
 
-app.get('/dummy', ({}, res) => res.json({ dummy: true }));
+app.get('/dummy', (req, res) => res.json({ dummy: true }));
 app.get('/params/:single_param', ({ params }, res) => res.json({ params }));
 app.get('/params/:multiple/:params', ({ params }, res) => res.json({ params }));
 app.get('/query', ({ query }, res) => res.json({ query }));

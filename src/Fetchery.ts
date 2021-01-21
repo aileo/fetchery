@@ -8,6 +8,7 @@ import {
   Result,
   Service,
   Services,
+  IError,
 } from './types';
 
 import * as processData from './data';
@@ -116,7 +117,7 @@ export default class Fetcher extends EventEmitter {
 
         let handler = services;
         for (const part of _path) {
-          handler[part] = handler[part] || {};
+          handler[part] = handler[part] || ({} as Services);
           handler = handler[part];
         }
 
@@ -136,7 +137,10 @@ export default class Fetcher extends EventEmitter {
     );
     let response;
 
-    const url: URL = new URL(solveParams(route, params), this._baseUrl);
+    const url: URL = new URL(
+      solveParams(route, params),
+      this._baseUrl || window?.location?.origin
+    );
     if (query) {
       url.search = processData.query(query);
     }
@@ -148,6 +152,13 @@ export default class Fetcher extends EventEmitter {
       });
     } catch (error) {
       this.emit('error', { path, error, options });
+      throw error;
+    }
+
+    if (!response.ok) {
+      const error = new Error(response.statusText) as IError;
+      error.status = response.status;
+      error.details = await response.text();
       throw error;
     }
 

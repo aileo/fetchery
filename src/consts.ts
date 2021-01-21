@@ -16,7 +16,7 @@ export enum CONTENT_TYPE {
 }
 
 export enum CAST {
-  JSON = 0,
-  URL,
-  FORMDATA,
+  JSON = 'json',
+  URL = 'URLSearchParams',
+  FORMDATA = 'FormData',
 }
