@@ -21,3 +21,7 @@ export type Definitions = Record<string, IDefinition>;
 export type Result = unknown | unknown[];
 
 export type Service = (options: IOptions) => Promise<Result>;
+
+export interface IService extends Service, Record<string, IService> {}
+
+export type Services = IService;

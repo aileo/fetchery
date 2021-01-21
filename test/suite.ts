@@ -59,6 +59,28 @@ describe('getService', () => {
   });
 });
 
+describe('getServices', () => {
+  let client: Fetchery;
+
+  before(() => {
+    client = new Fetchery('http://127.0.0.1:8080');
+    client.addService('dummy', { route: '/dummy' });
+    client.addService('item.get', { route: '/item', method: METHOD.GET });
+    client.addService('item.create', { route: '/item', method: METHOD.POST });
+  });
+  it('should get all services', () => {
+    const services = client.getServices();
+    assert.ok(typeof services.dummy === 'function');
+    assert.ok(typeof services.item.get === 'function');
+    assert.ok(typeof services.item.create === 'function');
+  });
+  it('should run dummy from services export', async () => {
+    const services = client.getServices();
+    const res = await services.dummy({});
+    assert.deepStrictEqual(res, { dummy: true });
+  });
+});
+
 describe('request', () => {
   let client: Fetchery;
 

@@ -1,7 +1,14 @@
 import { EventEmitter } from 'events';
 
 import { METHOD } from './consts';
-import { IOptions, IDefinition, Definitions, Result, Service } from './types';
+import {
+  IOptions,
+  IDefinition,
+  Definitions,
+  Result,
+  Service,
+  Services,
+} from './types';
 
 import * as processData from './data';
 
@@ -94,7 +101,29 @@ export default class Fetcher extends EventEmitter {
 
   public getService(path: string | string[]): Service {
     const _path = this.processPath(path, true);
-    return (options) => this.request(_path, options);
+    const request = this.request.bind(this);
+    return function (options) {
+      return request(_path, options);
+    };
+  }
+
+  public getServices(): Services {
+    return Object.keys(this._services)
+      .sort()
+      .reduce((services: Services, path: string) => {
+        const _path = path.split('.');
+        const name = _path.pop() as string;
+
+        let handler = services;
+        for (const part of _path) {
+          handler[part] = handler[part] || {};
+          handler = handler[part];
+        }
+
+        handler[name] = this.getService(path) as Services;
+
+        return services;
+      }, {} as Services);
   }
 
   public async request(

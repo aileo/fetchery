@@ -2,15 +2,9 @@
 
 Fetchery is a little wrapper around Javascript Fetch API written in Typescript to request REST API easily
 
-## Installation
-
-Using npm:
-
-```bash
-npm install fetchery
-```
-
 ## Usage
+
+### Create services
 
 ```typescript
 import Fetchery, { CAST, CONTENT_TYPE, METHOD } from './src';
@@ -26,7 +20,7 @@ const client = new Fetchery(
   }
 );
 
-// Add "services"
+// Add services
 client.addService(
   'user.login', // service path
   {
@@ -42,7 +36,11 @@ client.addService('file.upload', {
   cast: CAST.FORMDATA, // Will cast body as FormData
   contentType: false, // overwrite "Content-Type" header to send file using FormData
 });
+```
 
+### Use services
+
+```typescript
 // Request using services
 await client.request('user.login', {
   body: { username: 'foo', password: 'bar' },
@@ -57,6 +55,17 @@ const item = await getItem({
 // Send file
 await client.request('file.upload', {
   body: { item: item.name, file: new File(Array.from('foo'), 'bar.txt') },
+});
+```
+
+### Get all services
+
+```typescript
+const api = client.getServices;
+
+await api.user.login({ body: { username: 'foo', password: 'bar' } });
+const item = await api.item.get({
+  params: { uuid: 'abcdef00-0000-0000-0000-012345678910' },
 });
 ```
 
