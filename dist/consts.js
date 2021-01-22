@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.CAST = exports.CONTENT_TYPE = exports.METHOD = void 0;
 var METHOD;
 (function (METHOD) {
@@ -24,3 +24,4 @@ var CAST;
     CAST["URL"] = "URLSearchParams";
     CAST["FORMDATA"] = "FormData";
 })(CAST = exports.CAST || (exports.CAST = {}));
+//# sourceMappingURL=consts.js.map

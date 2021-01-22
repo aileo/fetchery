@@ -9,8 +9,9 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./consts"), exports);
 __exportStar(require("./types"), exports);
-var Fetchery_1 = require("./Fetchery");
-exports["default"] = Fetchery_1["default"];
+const Fetchery_1 = require("./Fetchery");
+exports.default = Fetchery_1.default;
+//# sourceMappingURL=index.js.map

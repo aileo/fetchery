@@ -1,7 +1,7 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.body = exports.query = exports.sanitize = void 0;
-var consts_1 = require("./consts");
+const consts_1 = require("./consts");
 function sanitize(value) {
     if (typeof value === 'string')
         return value;
@@ -9,10 +9,9 @@ function sanitize(value) {
 }
 exports.sanitize = sanitize;
 function toRecords(data) {
-    var obj = {};
+    const obj = {};
     //@ts-ignore: entries does not exists on FormData/URLSearchParams
-    for (var _i = 0, _a = data.entries(); _i < _a.length; _i++) {
-        var _b = _a[_i], key = _b[0], value = _b[1];
+    for (const [key, value] of data.entries()) {
         obj[key] = value;
     }
     return obj;
@@ -21,16 +20,16 @@ function toDataObject(data, Constructor) {
     if (data instanceof Constructor)
         return data;
     if (Array.isArray(data)) {
-        throw new Error("Can not convert to " + Constructor.name);
+        throw new Error(`Can not convert to ${Constructor.name}`);
     }
-    var _data = data instanceof FormData || data instanceof URLSearchParams
+    const _data = data instanceof FormData || data instanceof URLSearchParams
         ? toRecords(data)
         : data;
-    var obj = new Constructor(typeof _data === 'string' ? _data : undefined);
+    const obj = new Constructor(typeof _data === 'string' ? _data : undefined);
     if (typeof _data !== 'string') {
-        Object.keys(_data).forEach(function (key) {
+        Object.keys(_data).forEach((key) => {
             if (Array.isArray(_data[key])) {
-                _data[key].forEach(function (value) {
+                _data[key].forEach((value) => {
                     obj.append(key, sanitize(value));
                 });
             }
@@ -45,7 +44,7 @@ function toDataObject(data, Constructor) {
     return obj;
 }
 function toJson(data) {
-    var _data;
+    let _data;
     if (typeof data === 'string') {
         try {
             JSON.parse(data);
@@ -90,3 +89,4 @@ function body(cast, data) {
     return data;
 }
 exports.body = body;
+//# sourceMappingURL=data.js.map
