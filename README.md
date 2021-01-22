@@ -7,7 +7,7 @@ Fetchery is a little wrapper around Javascript Fetch API written in Typescript t
 ### Create services
 
 ```typescript
-import Fetchery, { CAST, CONTENT_TYPE, METHOD } from './src';
+import Fetchery, { CAST, CONTENT_TYPE, METHOD } from 'fetchery';
 
 // Create client
 const client = new Fetchery(

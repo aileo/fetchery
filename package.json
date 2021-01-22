@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "description": "A a little wrapper around Javascript Fetch API written in Typescript",
   "main": "dist/index.js",
+  "types": "dist/index.d.js",
   "scripts": {
     "lint": "eslint src/** test/** --ext ts",
     "test": "ts-node test/server.ts",
     "coverage": "nyc report --reporter=text-summary --reporter=html",
-    "build": "rm -rf dist && tsc --outDir dist src/**"
+    "build": "rm -rf dist && tsc"
   },
   "author": "aileo",
   "license": "MIT",
