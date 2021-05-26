@@ -168,12 +168,12 @@ export default class Fetchery extends EventEmitter {
       throw error;
     }
 
-    let data = undefined;
+    let data = await response.text();
 
     try {
-      data = response.json();
+      data = JSON.parse(data);
     } catch (error) {
-      this.emit('error', { path, error, options });
+      this.emit('error', { path, error, options, text: data });
       throw error;
     }
 
