@@ -137,7 +137,7 @@ export default class Fetchery extends EventEmitter {
     path: string | string[],
     options: ServiceOptions
   ): Promise<Result> {
-    const { route, cast, params = {}, query, body, ...init } = this.merge(
+    const { route, params = {}, query, body, ...init } = this.merge(
       this._services[this.processPath(path, true)],
       options
     );
@@ -154,7 +154,7 @@ export default class Fetchery extends EventEmitter {
     try {
       response = await fetch(url.toString(), {
         ...init,
-        body: processData.body(cast, body),
+        body: processData.body((init.headers || {})['Content-Type'], body),
       });
     } catch (error) {
       this.emit('error', { path, error, options });

@@ -7,7 +7,7 @@ Fetchery is a little wrapper around Javascript Fetch API written in Typescript t
 ### Create services
 
 ```typescript
-import Fetchery, { CAST, CONTENT_TYPE, METHOD } from 'fetchery';
+import Fetchery, { CONTENT_TYPE, METHOD } from 'fetchery';
 
 // Create client
 const client = new Fetchery(
@@ -15,8 +15,7 @@ const client = new Fetchery(
   // global defaults
   {
     method: METHOD.GET,
-    contentType: CONTENT_TYPE.JSON, // Add "Content-Type" header
-    cast: CAST.JSON, // Will cast body as JSON
+    contentType: CONTENT_TYPE.JSON, // Add "Content-Type" header and will cast content as JSON if compatible
   }
 );
 
@@ -33,7 +32,6 @@ client.addService('item.get', { route: '/api/item/:uuid' });
 client.addService('file.upload', {
   route: '/api/file',
   method: METHOD.POST,
-  cast: CAST.FORMDATA, // Will cast body as FormData
   contentType: false, // overwrite "Content-Type" header to send file using FormData
 });
 ```

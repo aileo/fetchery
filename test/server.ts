@@ -38,7 +38,7 @@ function build(): Promise<unknown> {
 
 async function test(): Promise<void> {
   await build();
-  const server = app.listen(process.env.PORT || 8080);
+  const server = app.listen(8080);
   const result = await runner({
     file: 'http://127.0.0.1:8080',
   });

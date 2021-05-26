@@ -1,4 +1,4 @@
-import { CAST } from './consts';
+import { CONTENT_TYPE } from './consts';
 import { Body } from './types';
 
 type Constructor<T> = new (...args: any[]) => T;
@@ -75,11 +75,14 @@ export function query(data: Record<string, unknown>): string {
   return toDataObject(data, URLSearchParams).toString();
 }
 
-export function body(cast?: CAST, data?: Body): BodyInit | null | undefined {
+export function body(
+  contentType?: string,
+  data?: Body
+): BodyInit | null | undefined {
   if (data === undefined) return undefined;
   if (data === null) return null;
   if (
-    cast === undefined ||
+    contentType === undefined ||
     data instanceof Blob ||
     data instanceof ArrayBuffer ||
     data instanceof ReadableStream
@@ -87,9 +90,13 @@ export function body(cast?: CAST, data?: Body): BodyInit | null | undefined {
     return data as BodyInit;
   }
 
-  if (cast === CAST.JSON) return toJson(data);
-  if (cast === CAST.URL) return toDataObject(data, URLSearchParams);
-  if (cast === CAST.FORMDATA) return toDataObject(data, FormData);
+  if (contentType === CONTENT_TYPE.JSON) return toJson(data);
+  if (contentType === CONTENT_TYPE.URLENCODED) {
+    return toDataObject(data, URLSearchParams);
+  }
+  if (contentType === CONTENT_TYPE.MULTIPART_FORMDATA) {
+    return toDataObject(data, FormData);
+  }
 
   return data as BodyInit;
 }

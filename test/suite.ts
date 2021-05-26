@@ -1,9 +1,7 @@
 import 'mocha';
-
-import Fetchery from '../src/index';
-
 import * as assert from 'assert';
-import { CAST, CONTENT_TYPE, METHOD } from '../src';
+
+import Fetchery, { CONTENT_TYPE, METHOD, body } from '../src/index';
 
 mocha.setup('bdd');
 
@@ -93,25 +91,21 @@ describe('request', () => {
     client.addService('body.json', {
       route: '/body/json',
       contentType: CONTENT_TYPE.JSON,
-      cast: CAST.JSON,
       method: METHOD.POST,
     });
     client.addService('body.form', {
       route: '/body/form',
       contentType: false,
-      cast: CAST.FORMDATA,
       method: METHOD.POST,
     });
     client.addService('body.url', {
       route: '/body/url',
       contentType: CONTENT_TYPE.URLENCODED,
-      cast: CAST.URL,
       method: METHOD.POST,
     });
     client.addService('body.file', {
       route: '/body/file',
       contentType: false,
-      cast: CAST.FORMDATA,
       method: METHOD.POST,
     });
   });
@@ -196,7 +190,9 @@ describe('request', () => {
 
     describe('Should send FormData', () => {
       it('From object', async () => {
-        const res = await client.request('body.form', { body: data.object });
+        const res = await client.request('body.form', {
+          body: body(CONTENT_TYPE.MULTIPART_FORMDATA, data.object),
+        });
         assert.deepStrictEqual(res, { body: data.object });
       });
       it('From FormData', async () => {
@@ -205,7 +201,7 @@ describe('request', () => {
       });
       it('From URLSearchParams', async () => {
         const res = await client.request('body.form', {
-          body: data.urlEncoded,
+          body: body(CONTENT_TYPE.MULTIPART_FORMDATA, data.urlEncoded),
         });
         assert.deepStrictEqual(res, { body: data.object });
       });
@@ -231,7 +227,9 @@ describe('request', () => {
     describe('Should send File', () => {
       it('From object', async () => {
         const file = new File(Array.from('test'), 'test.txt');
-        const res = await client.request('body.file', { body: { file } });
+        const res = await client.request('body.file', {
+          body: body(CONTENT_TYPE.MULTIPART_FORMDATA, { file }),
+        });
         assert.deepStrictEqual(res, { file: { name: 'test.txt', size: 4 } });
       });
       it('From FormData', async () => {
