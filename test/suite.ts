@@ -83,8 +83,35 @@ describe('request', () => {
   let client: Fetchery;
 
   before(() => {
-    client = new Fetchery('http://127.0.0.1:8080');
+    client = new Fetchery('http://127.0.0.1:8080', {
+      headers: {
+        globalDefault: 'globalDefault',
+        globalGetter() {
+          return 'globalGetter';
+        },
+      },
+      params: {
+        globalDefault: 'globalDefault',
+        globalGetter() {
+          return 'globalGetter';
+        },
+      },
+    });
     client.addService('params.single', { route: '/params/:id' });
+    client.addService('params.globalDefault', {
+      route: '/params/:globalDefault',
+    });
+    client.addService('params.globalGetter', {
+      route: '/params/:globalGetter',
+    });
+    client.addService('params.serviceDefault', {
+      route: '/params/:serviceDefault',
+      params: { serviceDefault: 'serviceDefault' },
+    });
+    client.addService('params.serviceGetter', {
+      route: '/params/:serviceGetter',
+      params: { serviceGetter: 'serviceGetter' },
+    });
     client.addService('params.multiple', { route: '/params/:id/:subid' });
     client.addService('params.duplicated', { route: '/params/:id/:id' });
     client.addService('query', { route: '/query' });
@@ -108,6 +135,31 @@ describe('request', () => {
       contentType: false,
       method: METHOD.POST,
     });
+    client.addService('header.global', { route: '/headers' });
+    client.addService('header.service', {
+      route: '/headers',
+      headers: {
+        serviceDefault: 'serviceDefault',
+        serviceGetter() {
+          return 'serviceGetter';
+        },
+      },
+    });
+  });
+
+  describe('headers', () => {
+    it('should retreive globals headers', async () => {
+      const { headers } = (await client.request('header.global')) as any;
+      assert.strictEqual(headers.globaldefault, 'globalDefault');
+      assert.strictEqual(headers.globalgetter, 'globalGetter');
+    });
+    it('should retreive globals and service headers', async () => {
+      const { headers } = (await client.request('header.service')) as any;
+      assert.strictEqual(headers.globaldefault, 'globalDefault');
+      assert.strictEqual(headers.globalgetter, 'globalGetter');
+      assert.strictEqual(headers.servicedefault, 'serviceDefault');
+      assert.strictEqual(headers.servicegetter, 'serviceGetter');
+    });
   });
 
   describe('params', () => {
@@ -116,6 +168,30 @@ describe('request', () => {
         params: { id: 'test' },
       });
       assert.deepStrictEqual(res, { params: { single_param: 'test' } });
+    });
+    it('should solve single param with global default', async () => {
+      const res = await client.request('params.globalDefault');
+      assert.deepStrictEqual(res, {
+        params: { single_param: 'globalDefault' },
+      });
+    });
+    it('should solve single param with global getter', async () => {
+      const res = await client.request('params.globalGetter');
+      assert.deepStrictEqual(res, {
+        params: { single_param: 'globalGetter' },
+      });
+    });
+    it('should solve single param with service default', async () => {
+      const res = await client.request('params.serviceDefault');
+      assert.deepStrictEqual(res, {
+        params: { single_param: 'serviceDefault' },
+      });
+    });
+    it('should solve single param with service getter', async () => {
+      const res = await client.request('params.serviceGetter');
+      assert.deepStrictEqual(res, {
+        params: { single_param: 'serviceGetter' },
+      });
     });
     it('should solve multiple params', async () => {
       const res = await client.request('params.multiple', {

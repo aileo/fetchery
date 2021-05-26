@@ -28,6 +28,7 @@ app.post('/body/url', express.urlencoded(), ({ body }, res) =>
 app.post('/body/file', upload.single('file'), ({ file }, res) =>
   res.json({ file: { name: file?.originalname, size: file?.size } })
 );
+app.get('/headers', (req, res) => res.json({ headers: req.headers }));
 
 function build(): Promise<unknown> {
   return new Promise((resolve) => {

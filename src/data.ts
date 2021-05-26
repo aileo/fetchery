@@ -4,8 +4,9 @@ import { Body } from './types';
 type Constructor<T> = new (...args: any[]) => T;
 
 export function sanitize(value: unknown): string {
-  if (typeof value === 'string') return value;
-  return JSON.stringify(value);
+  const _value = typeof value === 'function' ? value() : value;
+  if (typeof _value === 'string') return _value;
+  return JSON.stringify(_value);
 }
 
 function toRecords(data: URLSearchParams | FormData): Record<string, any> {
@@ -64,6 +65,8 @@ function toJson(
     _data = toRecords(data);
   } else if (Array.isArray(data)) {
     _data = data;
+  } else if (typeof data === 'function') {
+    _data = data();
   } else {
     _data = Object.assign({}, data);
   }

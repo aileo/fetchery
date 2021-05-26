@@ -25,6 +25,20 @@ function solveParams(
   }, route);
 }
 
+function resolveHeaders(
+  headers: Record<string, string | (() => string)>
+): Record<string, string> {
+  return Object.keys(headers).reduce((resolvedHeaders, header) => {
+    const value = headers[header];
+    if (typeof value === 'function') {
+      resolvedHeaders[header] = value();
+    } else {
+      resolvedHeaders[header] = value;
+    }
+    return resolvedHeaders;
+  }, {} as Record<string, string>);
+}
+
 export default class Fetchery extends EventEmitter {
   private _baseUrl: string;
   private _defaults: ServiceOptions;
@@ -109,7 +123,7 @@ export default class Fetchery extends EventEmitter {
   public getService(path: string | string[]): Service {
     const _path = this.processPath(path, true);
     const request = this.request.bind(this);
-    return function (options) {
+    return function (options = {}) {
       return request(_path, options);
     };
   }
@@ -135,12 +149,13 @@ export default class Fetchery extends EventEmitter {
 
   public async request(
     path: string | string[],
-    options: ServiceOptions
+    options: ServiceOptions = {}
   ): Promise<Result> {
     const { route, params = {}, query, body, ...init } = this.merge(
       this._services[this.processPath(path, true)],
       options
     );
+    const headers = resolveHeaders(init.headers || {});
     let response;
 
     const url: URL = new URL(
@@ -154,7 +169,8 @@ export default class Fetchery extends EventEmitter {
     try {
       response = await fetch(url.toString(), {
         ...init,
-        body: processData.body((init.headers || {})['Content-Type'], body),
+        headers,
+        body: processData.body(headers['Content-Type'], body),
       });
     } catch (error) {
       this.emit('error', { path, error, options });
