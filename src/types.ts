@@ -2,7 +2,7 @@ import { METHOD, CONTENT_TYPE, CAST } from './consts';
 
 export type Body = BodyInit | null | Record<string, unknown> | unknown[];
 
-export interface IOptions extends Omit<RequestInit, 'body'> {
+export interface ServiceOptions extends Omit<RequestInit, 'body'> {
   method?: METHOD;
   contentType?: CONTENT_TYPE | false;
   headers?: Record<string, string>;
@@ -12,21 +12,19 @@ export interface IOptions extends Omit<RequestInit, 'body'> {
   cast?: CAST;
 }
 
-export interface IDefinition extends IOptions {
+export interface ServiceDefinition extends ServiceOptions {
   route: string;
 }
 
-export type Definitions = Record<string, IDefinition>;
+export type ServiceDefinitions = Record<string, ServiceDefinition>;
 
 export type Result = unknown | unknown[];
 
-export type Service = (options: IOptions) => Promise<Result>;
+export type Service = (options: ServiceOptions) => Promise<Result>;
 
-export interface IService extends Service, Record<string, IService> {}
+export interface Services extends Service, Record<string, Services> {}
 
-export type Services = IService;
-
-export interface IError extends Error {
+export interface FetcheryError extends Error {
   status: number;
   details: string;
 }

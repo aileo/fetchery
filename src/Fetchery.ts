@@ -2,13 +2,13 @@ import { EventEmitter } from 'events';
 
 import { METHOD } from './consts';
 import {
-  IOptions,
-  IDefinition,
-  Definitions,
+  ServiceOptions,
+  ServiceDefinition,
+  ServiceDefinitions,
   Result,
   Service,
   Services,
-  IError,
+  FetcheryError,
 } from './types';
 
 import * as processData from './data';
@@ -27,11 +27,11 @@ function solveParams(
 
 export default class Fetchery extends EventEmitter {
   private _baseUrl: string;
-  private _defaults: IOptions;
+  private _defaults: ServiceOptions;
 
-  private _services: Definitions = {};
+  private _services: ServiceDefinitions = {};
 
-  constructor(baseUrl: string, defaults: IOptions = {}) {
+  constructor(baseUrl: string, defaults: ServiceOptions = {}) {
     super();
     this._baseUrl = baseUrl;
     this._defaults = {
@@ -48,7 +48,10 @@ export default class Fetchery extends EventEmitter {
     return _path;
   }
 
-  private merge(definition: IDefinition, options: IOptions): IDefinition {
+  private merge(
+    definition: ServiceDefinition,
+    options: ServiceOptions
+  ): ServiceDefinition {
     const {
       contentType: defaultsContentType,
       headers: defaultsHeaders = {},
@@ -92,7 +95,10 @@ export default class Fetchery extends EventEmitter {
     return { ...defaults, ..._definition, ..._options, headers, route };
   }
 
-  public addService(path: string | string[], definition: IDefinition): void {
+  public addService(
+    path: string | string[],
+    definition: ServiceDefinition
+  ): void {
     const _path = this.processPath(path);
     if (this._services[_path]) {
       throw new Error(`Service "${_path}" already exists`);
@@ -129,7 +135,7 @@ export default class Fetchery extends EventEmitter {
 
   public async request(
     path: string | string[],
-    options: IOptions
+    options: ServiceOptions
   ): Promise<Result> {
     const { route, cast, params = {}, query, body, ...init } = this.merge(
       this._services[this.processPath(path, true)],
@@ -156,7 +162,7 @@ export default class Fetchery extends EventEmitter {
     }
 
     if (!response.ok) {
-      const error = new Error(response.statusText) as IError;
+      const error = new Error(response.statusText) as FetcheryError;
       error.status = response.status;
       error.details = await response.text();
       throw error;
