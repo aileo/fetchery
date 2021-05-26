@@ -25,7 +25,7 @@ function solveParams(
   }, route);
 }
 
-export default class Fetcher extends EventEmitter {
+export default class Fetchery extends EventEmitter {
   private _baseUrl: string;
   private _defaults: IOptions;
 
