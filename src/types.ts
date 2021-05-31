@@ -2,8 +2,7 @@ import { METHOD, CONTENT_TYPE } from './consts';
 
 export type Body = BodyInit | null | Record<string, unknown> | unknown[];
 
-export interface ServiceOptions
-  extends Omit<Omit<RequestInit, 'body'>, 'headers'> {
+export interface ServiceOptions extends Omit<RequestInit, 'body' | 'headers'> {
   method?: METHOD;
   contentType?: CONTENT_TYPE | false;
   headers?: Record<string, string | (() => string)>;
