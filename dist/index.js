@@ -12,6 +12,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./consts"), exports);
 __exportStar(require("./types"), exports);
+__exportStar(require("./data"), exports);
+__exportStar(require("./Fetchery"), exports);
 const Fetchery_1 = require("./Fetchery");
-exports.default = Fetchery_1.default;
+exports.default = Fetchery_1.Client;
 //# sourceMappingURL=index.js.map

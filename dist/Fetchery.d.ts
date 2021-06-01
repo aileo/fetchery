@@ -1,15 +1,15 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
-import { IOptions, IDefinition, Result, Service, Services } from './types';
-export default class Fetcher extends EventEmitter {
+import { Options, Definition, Result, Service, Services } from './types';
+export declare class Client extends EventEmitter {
     private _baseUrl;
     private _defaults;
     private _services;
-    constructor(baseUrl: string, defaults?: IOptions);
+    constructor(baseUrl: string, defaults?: Options);
     private processPath;
     private merge;
-    addService(path: string | string[], definition: IDefinition): void;
+    addService(path: string | string[], definition: Definition): void;
     getService(path: string | string[]): Service;
     getServices(): Services;
-    request(path: string | string[], options: IOptions): Promise<Result>;
+    request(path: string | string[], options?: Options): Promise<Result>;
 }

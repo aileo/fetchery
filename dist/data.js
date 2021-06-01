@@ -3,9 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.body = exports.query = exports.sanitize = void 0;
 const consts_1 = require("./consts");
 function sanitize(value) {
-    if (typeof value === 'string')
-        return value;
-    return JSON.stringify(value);
+    const _value = typeof value === 'function' ? value() : value;
+    if (typeof _value === 'string')
+        return _value;
+    return JSON.stringify(_value);
 }
 exports.sanitize = sanitize;
 function toRecords(data) {
@@ -60,6 +61,9 @@ function toJson(data) {
     else if (Array.isArray(data)) {
         _data = data;
     }
+    else if (typeof data === 'function') {
+        _data = data();
+    }
     else {
         _data = Object.assign({}, data);
     }
@@ -69,23 +73,25 @@ function query(data) {
     return toDataObject(data, URLSearchParams).toString();
 }
 exports.query = query;
-function body(cast, data) {
+function body(contentType, data) {
     if (data === undefined)
         return undefined;
     if (data === null)
         return null;
-    if (cast === undefined ||
+    if (contentType === undefined ||
         data instanceof Blob ||
         data instanceof ArrayBuffer ||
         data instanceof ReadableStream) {
         return data;
     }
-    if (cast === consts_1.CAST.JSON)
+    if (contentType === consts_1.CONTENT_TYPE.JSON)
         return toJson(data);
-    if (cast === consts_1.CAST.URL)
+    if (contentType === consts_1.CONTENT_TYPE.URLENCODED) {
         return toDataObject(data, URLSearchParams);
-    if (cast === consts_1.CAST.FORMDATA)
+    }
+    if (contentType === consts_1.CONTENT_TYPE.MULTIPART_FORMDATA) {
         return toDataObject(data, FormData);
+    }
     return data;
 }
 exports.body = body;

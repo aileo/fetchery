@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Client = void 0;
 const events_1 = require("events");
 const consts_1 = require("./consts");
 const processData = require("./data");
@@ -8,7 +9,19 @@ function solveParams(route, params = {}) {
         return url.replace(new RegExp(`:${param}\\b`, 'g'), escape(processData.sanitize(params[param])));
     }, route);
 }
-class Fetcher extends events_1.EventEmitter {
+function resolveHeaders(headers) {
+    return Object.keys(headers).reduce((resolvedHeaders, header) => {
+        const value = headers[header];
+        if (typeof value === 'function') {
+            resolvedHeaders[header] = value();
+        }
+        else {
+            resolvedHeaders[header] = value;
+        }
+        return resolvedHeaders;
+    }, {});
+}
+class Client extends events_1.EventEmitter {
     constructor(baseUrl, defaults = {}) {
         super();
         this._services = {};
@@ -60,7 +73,7 @@ class Fetcher extends events_1.EventEmitter {
     getService(path) {
         const _path = this.processPath(path, true);
         const request = this.request.bind(this);
-        return function (options) {
+        return function (options = {}) {
             return request(_path, options);
         };
     }
@@ -79,9 +92,10 @@ class Fetcher extends events_1.EventEmitter {
             return services;
         }, {});
     }
-    async request(path, options) {
+    async request(path, options = {}) {
         var _a;
-        const { route, cast, params = {}, query, body, ...init } = this.merge(this._services[this.processPath(path, true)], options);
+        const { route, params = {}, query, body, ...init } = this.merge(this._services[this.processPath(path, true)], options);
+        const headers = resolveHeaders(init.headers || {});
         let response;
         const url = new URL(solveParams(route, params), this._baseUrl || ((_a = window === null || window === void 0 ? void 0 : window.location) === null || _a === void 0 ? void 0 : _a.origin));
         if (query) {
@@ -90,7 +104,8 @@ class Fetcher extends events_1.EventEmitter {
         try {
             response = await fetch(url.toString(), {
                 ...init,
-                body: processData.body(cast, body),
+                headers,
+                body: processData.body(headers['Content-Type'], body),
             });
         }
         catch (error) {
@@ -103,17 +118,17 @@ class Fetcher extends events_1.EventEmitter {
             error.details = await response.text();
             throw error;
         }
-        let data = undefined;
+        let data = await response.text();
         try {
-            data = response.json();
+            data = JSON.parse(data);
         }
         catch (error) {
-            this.emit('error', { path, error, options });
+            this.emit('error', { path, error, options, text: data });
             throw error;
         }
         this.emit('data', { path, data, options });
         return data;
     }
 }
-exports.default = Fetcher;
+exports.Client = Client;
 //# sourceMappingURL=Fetchery.js.map

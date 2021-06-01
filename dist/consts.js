@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CAST = exports.CONTENT_TYPE = exports.METHOD = void 0;
+exports.CONTENT_TYPE = exports.METHOD = void 0;
 var METHOD;
 (function (METHOD) {
     METHOD["GET"] = "GET";
@@ -16,12 +16,6 @@ var CONTENT_TYPE;
     CONTENT_TYPE["JSON"] = "application/json";
     CONTENT_TYPE["URLENCODED"] = "application/x-www-form-urlencoded";
     CONTENT_TYPE["BINARY"] = "application/octet-stream";
-    CONTENT_TYPE["MULTIPART"] = "multipart/form-data";
+    CONTENT_TYPE["MULTIPART_FORMDATA"] = "multipart/form-data";
 })(CONTENT_TYPE = exports.CONTENT_TYPE || (exports.CONTENT_TYPE = {}));
-var CAST;
-(function (CAST) {
-    CAST["JSON"] = "json";
-    CAST["URL"] = "URLSearchParams";
-    CAST["FORMDATA"] = "FormData";
-})(CAST = exports.CAST || (exports.CAST = {}));
 //# sourceMappingURL=consts.js.map

@@ -11,10 +11,5 @@ export declare enum CONTENT_TYPE {
     JSON = "application/json",
     URLENCODED = "application/x-www-form-urlencoded",
     BINARY = "application/octet-stream",
-    MULTIPART = "multipart/form-data"
-}
-export declare enum CAST {
-    JSON = "json",
-    URL = "URLSearchParams",
-    FORMDATA = "FormData"
+    MULTIPART_FORMDATA = "multipart/form-data"
 }
