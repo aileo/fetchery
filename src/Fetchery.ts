@@ -2,9 +2,8 @@ import { EventEmitter } from 'events';
 
 import { METHOD } from './consts';
 import {
-  ServiceOptions,
-  ServiceDefinition,
-  ServiceDefinitions,
+  Options,
+  Definition,
   Result,
   Service,
   Services,
@@ -39,13 +38,13 @@ function resolveHeaders(
   }, {} as Record<string, string>);
 }
 
-export default class Fetchery extends EventEmitter {
+export class Client extends EventEmitter {
   private _baseUrl: string;
-  private _defaults: ServiceOptions;
+  private _defaults: Options;
 
-  private _services: ServiceDefinitions = {};
+  private _services: Record<string, Definition> = {};
 
-  constructor(baseUrl: string, defaults: ServiceOptions = {}) {
+  constructor(baseUrl: string, defaults: Options = {}) {
     super();
     this._baseUrl = baseUrl;
     this._defaults = {
@@ -62,10 +61,7 @@ export default class Fetchery extends EventEmitter {
     return _path;
   }
 
-  private merge(
-    definition: ServiceDefinition,
-    options: ServiceOptions
-  ): ServiceDefinition {
+  private merge(definition: Definition, options: Options): Definition {
     const {
       contentType: defaultsContentType,
       headers: defaultsHeaders = {},
@@ -109,10 +105,7 @@ export default class Fetchery extends EventEmitter {
     return { ...defaults, ..._definition, ..._options, headers, route };
   }
 
-  public addService(
-    path: string | string[],
-    definition: ServiceDefinition
-  ): void {
+  public addService(path: string | string[], definition: Definition): void {
     const _path = this.processPath(path);
     if (this._services[_path]) {
       throw new Error(`Service "${_path}" already exists`);
@@ -149,7 +142,7 @@ export default class Fetchery extends EventEmitter {
 
   public async request(
     path: string | string[],
-    options: ServiceOptions = {}
+    options: Options = {}
   ): Promise<Result> {
     const { route, params = {}, query, body, ...init } = this.merge(
       this._services[this.processPath(path, true)],

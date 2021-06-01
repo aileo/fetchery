@@ -1,7 +1,7 @@
 export * from './consts';
 export * from './types';
 export * from './data';
+export * from './Fetchery';
 
-import Fetchery from './Fetchery';
-
-export default Fetchery;
+import { Client } from './Fetchery';
+export default Client;

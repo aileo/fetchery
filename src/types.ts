@@ -2,7 +2,7 @@ import { METHOD, CONTENT_TYPE } from './consts';
 
 export type Body = BodyInit | null | Record<string, unknown> | unknown[];
 
-export interface ServiceOptions extends Omit<RequestInit, 'body' | 'headers'> {
+export interface Options extends Omit<RequestInit, 'body' | 'headers'> {
   method?: METHOD;
   contentType?: CONTENT_TYPE | false;
   headers?: Record<string, string | (() => string)>;
@@ -11,15 +11,13 @@ export interface ServiceOptions extends Omit<RequestInit, 'body' | 'headers'> {
   body?: Body;
 }
 
-export interface ServiceDefinition extends ServiceOptions {
+export interface Definition extends Options {
   route: string;
 }
 
-export type ServiceDefinitions = Record<string, ServiceDefinition>;
-
 export type Result = unknown | unknown[];
 
-export type Service = (options?: ServiceOptions) => Promise<Result>;
+export type Service = (options?: Options) => Promise<Result>;
 
 export interface Services extends Service, Record<string, Services> {}
 
