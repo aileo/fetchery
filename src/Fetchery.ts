@@ -8,19 +8,22 @@ import {
   Service,
   Services,
   FetcheryError,
+  ParamSolver,
 } from './types';
 
 import * as processData from './data';
 
+const defaultParamSolver: ParamSolver = (url, param, value) => {
+  return url.replace(new RegExp(`:${param}\\b`, 'g'), value);
+};
+
 function solveParams(
   route: string,
-  params: Record<string, unknown> = {}
+  params: Record<string, unknown> = {},
+  solver: ParamSolver = defaultParamSolver
 ): string {
   return Object.keys(params).reduce((url, param) => {
-    return url.replace(
-      new RegExp(`:${param}\\b`, 'g'),
-      escape(processData.sanitize(params[param]))
-    );
+    return solver(url, param, escape(processData.sanitize(params[param])));
   }, route);
 }
 
@@ -144,7 +147,7 @@ export class Client extends EventEmitter {
     path: string | string[],
     options: Options = {}
   ): Promise<Result> {
-    const { route, params = {}, query, body, ...init } = this.merge(
+    const { route, params = {}, query, body, solver, ...init } = this.merge(
       this._services[this.processPath(path, true)],
       options
     );
@@ -152,7 +155,7 @@ export class Client extends EventEmitter {
     let response;
 
     const url: URL = new URL(
-      solveParams(route, params),
+      solveParams(route, params, solver),
       this._baseUrl || window?.location?.origin
     );
     if (query) {

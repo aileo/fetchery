@@ -114,6 +114,12 @@ describe('request', () => {
     });
     client.addService('params.multiple', { route: '/params/:id/:subid' });
     client.addService('params.duplicated', { route: '/params/:id/:id' });
+    client.addService('params.solver', {
+      route: '/params/{id}',
+      solver: (url, param, value) => {
+        return url.replace(new RegExp(`{${param}}`, 'g'), value);
+      },
+    });
     client.addService('query', { route: '/query' });
     client.addService('body.json', {
       route: '/body/json',
@@ -208,6 +214,12 @@ describe('request', () => {
       assert.deepStrictEqual(res, {
         params: { multiple: 'foo', params: 'bar' },
       });
+    });
+    it('should solve with custom solver', async () => {
+      const res = await client.request('params.solver', {
+        params: { id: 'test' },
+      });
+      assert.deepStrictEqual(res, { params: { single_param: 'test' } });
     });
   });
 
