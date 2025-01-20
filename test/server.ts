@@ -1,61 +1,43 @@
 import { resolve } from 'path';
-import * as express from 'express';
-import * as Bundler from 'parcel-bundler';
-import { runner } from 'mocha-headless-chrome';
-import * as multer from 'multer';
+import express from 'express';
+import multer from 'multer';
+import { beforeAll, afterAll } from 'vitest';
+import * as http from 'http';
 
-import { writeFile } from 'fs';
+import type { Express } from 'express';
 
 const upload = multer();
+let server: http.Server;
 
-const bundler = new Bundler(resolve(__dirname, './suite.html'), {
-  watch: false,
-  outDir: './dev',
+beforeAll(() => {
+  const app: Express = express();
+
+  app.get('/dummy', (req, res) => res.json({ dummy: true }));
+  app.get('/params/:single_param', ({ params }, res) => res.json({ params }));
+  app.get('/params/:multiple/:params', ({ params }, res) =>
+    res.json({ params })
+  );
+  app.get('/query', ({ query }, res) => res.json({ query }));
+  app.post('/body/json', express.json(), ({ body }, res) => res.json({ body }));
+  app.post('/body/form', upload.none(), ({ body }, res) =>
+    res.json({ body: body })
+  );
+  app.post('/body/url', express.urlencoded(), ({ body }, res) =>
+    res.json({ body: body })
+  );
+  app.post('/body/file', upload.single('file'), ({ file }, res) =>
+    res.json({ file: { name: file?.originalname, size: file?.size } })
+  );
+  app.get('/headers', (req, res) => res.json({ headers: req.headers }));
+
+  app.use('/coverage', express.static(resolve(__dirname, '../coverage')));
+  app.use('/test', express.static(resolve(__dirname, '../test')));
+
+  return new Promise<void>((resolve) => {
+    server = app.listen(8080, () => resolve());
+  });
 });
-const app = express();
 
-app.get('/dummy', (req, res) => res.json({ dummy: true }));
-app.get('/params/:single_param', ({ params }, res) => res.json({ params }));
-app.get('/params/:multiple/:params', ({ params }, res) => res.json({ params }));
-app.get('/query', ({ query }, res) => res.json({ query }));
-app.post('/body/json', express.json(), ({ body }, res) => res.json({ body }));
-app.post('/body/form', upload.none(), ({ body }, res) =>
-  res.json({ body: body })
-);
-app.post('/body/url', express.urlencoded(), ({ body }, res) =>
-  res.json({ body: body })
-);
-app.post('/body/file', upload.single('file'), ({ file }, res) =>
-  res.json({ file: { name: file?.originalname, size: file?.size } })
-);
-app.get('/headers', (req, res) => res.json({ headers: req.headers }));
-
-function build(): Promise<unknown> {
-  return new Promise((resolve) => {
-    bundler.on('bundled', () => resolve(undefined));
-    app.use(bundler.middleware());
-  });
-}
-
-async function test(): Promise<void> {
-  await build();
-  const server = app.listen(8080);
-  const result = await runner({
-    file: 'http://127.0.0.1:8080',
-  });
-
-  await new Promise((accept, reject) => {
-    writeFile(
-      resolve(__dirname, '../.nyc_output/out.json'),
-      JSON.stringify(result.coverage),
-      (err) => {
-        if (err) reject(err);
-        else accept(undefined);
-      }
-    );
-  });
-
+afterAll(() => {
   server.close();
-}
-
-test();
+});

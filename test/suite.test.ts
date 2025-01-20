@@ -1,9 +1,6 @@
-import 'mocha';
-import * as assert from 'assert';
-
+import { describe, test, expect, beforeAll } from 'vitest';
 import Fetchery, { CONTENT_TYPE, METHOD, body } from '../src/index';
-
-mocha.setup('bdd');
+import { Request } from 'express';
 
 const data = {
   object: { foo1: 'bar1', foo2: 'bar2' },
@@ -18,71 +15,79 @@ data.urlEncoded.append('foo2', 'bar2');
 describe('addService', () => {
   let client: Fetchery;
 
-  before(() => {
+  beforeAll(() => {
     client = new Fetchery('http://127.0.0.1:8080');
     client.addService('foo.bar', { route: '/foo' });
   });
-  it('should add service using string path', () => {
+
+  test('should add service using string path', () => {
     client.addService('string.path', { route: '/foo' });
   });
-  it('should add service using array path', () => {
+
+  test('should add service using array path', () => {
     client.addService(['array', 'path'], { route: '/foo' });
   });
-  it('should throw if service already exists', () => {
-    assert.throws(() => {
+
+  test('should throw if service already exists', () => {
+    expect(() => {
       client.addService(['foo', 'bar'], { route: '/bar' });
-    }, 'Service "foo.bar" already exists');
+    }).toThrow('Service "foo.bar" already exists');
   });
 });
 
 describe('getService', () => {
   let client: Fetchery;
 
-  before(() => {
+  beforeAll(() => {
     client = new Fetchery('http://127.0.0.1:8080');
     client.addService('foo.bar', { route: '/service' });
   });
-  it('should get service using string path', () => {
+
+  test('should get service using string path', () => {
     const service = client.getService('foo.bar');
-    assert.ok(typeof service === 'function');
+    expect(typeof service).toBe('function');
   });
-  it('should get service using array path', () => {
+
+  test('should get service using array path', () => {
     const service = client.getService(['foo', 'bar']);
-    assert.ok(typeof service === 'function');
+    expect(typeof service).toBe('function');
   });
-  it('should throw if service does not exists', () => {
-    assert.throws(() => {
+
+  test('should throw if service does not exists', () => {
+    expect(() => {
       client.getService(['does', 'not', 'exists']);
-    }, 'Service "does.not.exists" not found');
+    }).toThrow('Service "does.not.exists" not found');
   });
 });
 
 describe('getServices', () => {
   let client: Fetchery;
 
-  before(() => {
+  beforeAll(() => {
     client = new Fetchery('http://127.0.0.1:8080');
     client.addService('dummy', { route: '/dummy' });
     client.addService('item.get', { route: '/item', method: METHOD.GET });
     client.addService('item.create', { route: '/item', method: METHOD.POST });
   });
-  it('should get all services', () => {
+
+  test('should get all services', () => {
     const services = client.getServices();
-    assert.ok(typeof services.dummy === 'function');
-    assert.ok(typeof services.item.get === 'function');
-    assert.ok(typeof services.item.create === 'function');
+    expect(typeof services.dummy).toBe('function');
+    expect(typeof services.item.get).toBe('function');
+    expect(typeof services.item.create).toBe('function');
   });
-  it('should run dummy from services export', async () => {
+
+  test('should run dummy from services export', async () => {
     const services = client.getServices();
     const res = await services.dummy({});
-    assert.deepStrictEqual(res, { dummy: true });
+    expect(res).toEqual({ dummy: true });
   });
 });
 
 describe('request', () => {
   let client: Fetchery;
 
-  before(() => {
+  beforeAll(() => {
     client = new Fetchery('http://127.0.0.1:8080', {
       headers: {
         globalDefault: 'globalDefault',
@@ -97,6 +102,7 @@ describe('request', () => {
         },
       },
     });
+
     client.addService('params.single', { route: '/params/:id' });
     client.addService('params.globalDefault', {
       route: '/params/:globalDefault',
@@ -154,181 +160,184 @@ describe('request', () => {
   });
 
   describe('headers', () => {
-    it('should retreive globals headers', async () => {
-      const { headers } = (await client.request('header.global')) as any;
-      assert.strictEqual(headers.globaldefault, 'globalDefault');
-      assert.strictEqual(headers.globalgetter, 'globalGetter');
+    test('should retrieve globals headers', async () => {
+      const { headers } = (await client.request('header.global')) as Request;
+      expect(headers.globaldefault).toBe('globalDefault');
+      expect(headers.globalgetter).toBe('globalGetter');
     });
-    it('should retreive globals and service headers', async () => {
-      const { headers } = (await client.request('header.service')) as any;
-      assert.strictEqual(headers.globaldefault, 'globalDefault');
-      assert.strictEqual(headers.globalgetter, 'globalGetter');
-      assert.strictEqual(headers.servicedefault, 'serviceDefault');
-      assert.strictEqual(headers.servicegetter, 'serviceGetter');
+
+    test('should retrieve globals and service headers', async () => {
+      const { headers } = (await client.request('header.service')) as Request;
+      expect(headers.globaldefault).toBe('globalDefault');
+      expect(headers.globalgetter).toBe('globalGetter');
+      expect(headers.servicedefault).toBe('serviceDefault');
+      expect(headers.servicegetter).toBe('serviceGetter');
     });
   });
 
   describe('params', () => {
-    it('should solve single param', async () => {
+    test('should solve single param', async () => {
       const res = await client.request('params.single', {
         params: { id: 'test' },
       });
-      assert.deepStrictEqual(res, { params: { single_param: 'test' } });
+      expect(res).toEqual({ params: { single_param: 'test' } });
     });
-    it('should solve single param with global default', async () => {
+
+    test('should solve single param with global default', async () => {
       const res = await client.request('params.globalDefault');
-      assert.deepStrictEqual(res, {
-        params: { single_param: 'globalDefault' },
-      });
+      expect(res).toEqual({ params: { single_param: 'globalDefault' } });
     });
-    it('should solve single param with global getter', async () => {
+
+    test('should solve single param with global getter', async () => {
       const res = await client.request('params.globalGetter');
-      assert.deepStrictEqual(res, {
-        params: { single_param: 'globalGetter' },
-      });
+      expect(res).toEqual({ params: { single_param: 'globalGetter' } });
     });
-    it('should solve single param with service default', async () => {
+
+    test('should solve single param with service default', async () => {
       const res = await client.request('params.serviceDefault');
-      assert.deepStrictEqual(res, {
-        params: { single_param: 'serviceDefault' },
-      });
+      expect(res).toEqual({ params: { single_param: 'serviceDefault' } });
     });
-    it('should solve single param with service getter', async () => {
+
+    test('should solve single param with service getter', async () => {
       const res = await client.request('params.serviceGetter');
-      assert.deepStrictEqual(res, {
-        params: { single_param: 'serviceGetter' },
-      });
+      expect(res).toEqual({ params: { single_param: 'serviceGetter' } });
     });
-    it('should solve multiple params', async () => {
+
+    test('should solve multiple params', async () => {
       const res = await client.request('params.multiple', {
         params: { id: 'foo', subid: 'bar' },
       });
-      assert.deepStrictEqual(res, {
-        params: { multiple: 'foo', params: 'bar' },
-      });
+      expect(res).toEqual({ params: { multiple: 'foo', params: 'bar' } });
     });
-    it('should solve repeated param', async () => {
+
+    test('should solve repeated param', async () => {
       const res = await client.request('params.multiple', {
         params: { id: 'foo', subid: 'bar' },
       });
-      assert.deepStrictEqual(res, {
-        params: { multiple: 'foo', params: 'bar' },
-      });
+      expect(res).toEqual({ params: { multiple: 'foo', params: 'bar' } });
     });
-    it('should solve with custom solver', async () => {
+
+    test('should solve with custom solver', async () => {
       const res = await client.request('params.solver', {
         params: { id: 'test' },
       });
-      assert.deepStrictEqual(res, { params: { single_param: 'test' } });
+      expect(res).toEqual({ params: { single_param: 'test' } });
     });
   });
 
   describe('query', () => {
-    it('should solve single query param', async () => {
+    test('should solve single query param', async () => {
       const res = await client.request('query', {
         query: { foo: 'bar' },
       });
-      assert.deepStrictEqual(res, { query: { foo: 'bar' } });
+      expect(res).toEqual({ query: { foo: 'bar' } });
     });
-    it('should solve multiple query params', async () => {
+
+    test('should solve multiple query params', async () => {
       const res = await client.request('query', {
         query: { foo1: 'bar1', foo2: 'bar2' },
       });
-      assert.deepStrictEqual(res, {
-        query: { foo1: 'bar1', foo2: 'bar2' },
-      });
+      expect(res).toEqual({ query: { foo1: 'bar1', foo2: 'bar2' } });
     });
-    it('should solve query array params', async () => {
+
+    test('should solve query array params', async () => {
       const res = await client.request('query', {
         query: { array: ['foo', 'bar'] },
       });
-      assert.deepStrictEqual(res, { query: { array: ['foo', 'bar'] } });
+      expect(res).toEqual({ query: { array: ['foo', 'bar'] } });
     });
-    it('should solve query object params', async () => {
+
+    test('should solve query object params', async () => {
       const res = await client.request('query', {
         query: { object: { foo: 'bar' } },
       });
-      assert.deepStrictEqual(res, { query: { object: '{"foo":"bar"}' } });
+      expect(res).toEqual({ query: { object: '{"foo":"bar"}' } });
     });
   });
 
   describe('body', () => {
     describe('Should send json', () => {
-      it('From object', async () => {
+      test('From object', async () => {
         const res = await client.request('body.json', { body: data.object });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From JSON string', async () => {
+
+      test('From JSON string', async () => {
         const res = await client.request('body.json', {
           body: JSON.stringify(data.object),
         });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From FormData', async () => {
+
+      test('From FormData', async () => {
         const res = await client.request('body.json', { body: data.formData });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From URLSearchParams', async () => {
+
+      test('From URLSearchParams', async () => {
         const res = await client.request('body.json', {
           body: data.urlEncoded,
         });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
     });
 
     describe('Should send FormData', () => {
-      it('From object', async () => {
+      test('From object', async () => {
         const res = await client.request('body.form', {
           body: body(CONTENT_TYPE.MULTIPART_FORMDATA, data.object),
         });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From FormData', async () => {
+
+      test('From FormData', async () => {
         const res = await client.request('body.form', { body: data.formData });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From URLSearchParams', async () => {
+
+      test('From URLSearchParams', async () => {
         const res = await client.request('body.form', {
           body: body(CONTENT_TYPE.MULTIPART_FORMDATA, data.urlEncoded),
         });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
     });
 
     describe('Should send URLSearchParams', () => {
-      it('From object', async () => {
+      test('From object', async () => {
         const res = await client.request('body.url', { body: data.object });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From FormData', async () => {
+
+      test('From FormData', async () => {
         const res = await client.request('body.url', { body: data.formData });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
-      it('From URLSearchParams', async () => {
+
+      test('From URLSearchParams', async () => {
         const res = await client.request('body.url', {
           body: data.urlEncoded,
         });
-        assert.deepStrictEqual(res, { body: data.object });
+        expect(res).toEqual({ body: data.object });
       });
     });
 
     describe('Should send File', () => {
-      it('From object', async () => {
+      test('From object', async () => {
         const file = new File(Array.from('test'), 'test.txt');
         const res = await client.request('body.file', {
           body: body(CONTENT_TYPE.MULTIPART_FORMDATA, { file }),
         });
-        assert.deepStrictEqual(res, { file: { name: 'test.txt', size: 4 } });
+        expect(res).toEqual({ file: { name: 'test.txt', size: 4 } });
       });
-      it('From FormData', async () => {
+
+      test('From FormData', async () => {
         const file = new File(Array.from('test'), 'test.txt');
         const body = new FormData();
         body.append('file', file);
         const res = await client.request('body.file', { body });
-        assert.deepStrictEqual(res, { file: { name: 'test.txt', size: 4 } });
+        expect(res).toEqual({ file: { name: 'test.txt', size: 4 } });
       });
     });
   });
 });
-
-mocha.run();
