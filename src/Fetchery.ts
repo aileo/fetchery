@@ -147,10 +147,14 @@ export class Client extends EventEmitter {
     path: string | string[],
     options: Options = {}
   ): Promise<Result> {
-    const { route, params = {}, query, body, solver, ...init } = this.merge(
-      this._services[this.processPath(path, true)],
-      options
-    );
+    const {
+      route,
+      params = {},
+      query,
+      body,
+      solver,
+      ...init
+    } = this.merge(this._services[this.processPath(path, true)], options);
     const headers = resolveHeaders(init.headers || {});
     let response;
 
