@@ -1,7 +1,7 @@
 import { CONTENT_TYPE } from './consts';
 import { Body } from './types';
 
-type Constructor<T> = new (...args: any[]) => T;
+type Constructor<T> = new (...args: undefined[]) => T;
 
 export function sanitize(value: unknown): string {
   const _value = typeof value === 'function' ? value() : value;
@@ -9,7 +9,7 @@ export function sanitize(value: unknown): string {
   return JSON.stringify(_value);
 }
 
-function toRecords(data: URLSearchParams | FormData): Record<string, any> {
+function toRecords(data: URLSearchParams | FormData): Record<string, unknown> {
   const obj: Record<string, unknown> = {};
   //@ts-ignore: entries does not exists on FormData/URLSearchParams
   for (const [key, value] of data.entries()) {
@@ -19,7 +19,13 @@ function toRecords(data: URLSearchParams | FormData): Record<string, any> {
 }
 
 function toDataObject(
-  data: Record<string, any> | URLSearchParams | FormData | unknown[] | string,
+  data:
+    | Record<string, unknown>
+    | URLSearchParams
+    | FormData
+    | unknown[]
+    | ArrayBufferView<ArrayBufferLike>
+    | string,
   Constructor: Constructor<FormData | URLSearchParams>
 ) {
   if (data instanceof Constructor) return data;
@@ -31,18 +37,19 @@ function toDataObject(
     data instanceof FormData || data instanceof URLSearchParams
       ? toRecords(data)
       : data;
-  const obj = new Constructor(typeof _data === 'string' ? _data : undefined);
+  const obj = new Constructor(undefined);
 
   if (typeof _data !== 'string') {
-    Object.keys(_data).forEach((key) => {
-      if (Array.isArray(_data[key])) {
-        _data[key].forEach((value: any) => {
-          obj.append(key, sanitize(value));
+    Object.keys(_data as Record<string, unknown>).forEach((key) => {
+      const value = (_data as Record<string, unknown>)[key];
+      if (Array.isArray(value)) {
+        value.forEach((val: unknown) => {
+          obj.append(key, sanitize(val));
         });
-      } else if (_data[key] instanceof File) {
-        obj.append(key, _data[key]);
+      } else if (value instanceof File && obj instanceof FormData) {
+        obj.append(key, value);
       } else {
-        obj.append(key, sanitize(_data[key]));
+        obj.append(key, sanitize(value));
       }
     });
   }
@@ -50,9 +57,16 @@ function toDataObject(
 }
 
 function toJson(
-  data: Record<string, any> | URLSearchParams | FormData | any[] | string
+  data:
+    | Record<string, unknown>
+    | URLSearchParams
+    | FormData
+    | unknown[]
+    | string
+    | (() => unknown)
+    | ArrayBufferView<ArrayBufferLike>
 ): string {
-  let _data: any;
+  let _data: unknown;
 
   if (typeof data === 'string') {
     try {
